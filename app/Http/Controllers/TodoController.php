@@ -14,9 +14,6 @@ use Illuminate\Support\Facades\Redirect;
 
 class TodoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): View
     {
         $todos = Todo::query()->select(['id', 'title', 'due_date', 'created_at'])->paginate(10);
@@ -26,17 +23,11 @@ class TodoController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): View
     {
         return view('todo.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(TodoRequest $request): RedirectResponse
     {
         $data = $request->validated();
@@ -46,23 +37,22 @@ class TodoController extends Controller
             'due_date' => Carbon::createFromDate($data['due_date'])->toDateTimeString()
         ]);
 
-        return Redirect::route('todo.index')->with('status', 'profile-updated');
+        return Redirect::route('todo.index')->with('status', 'todo-created');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+
+    public function show(Todo $todo): View
     {
-        //
+        return view('todo.show', [
+            'todo' => $todo
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Todo $todo): View
     {
-        //
+        return view('todo.edit', [
+            'todo' => $todo
+        ]);
     }
 
     /**
