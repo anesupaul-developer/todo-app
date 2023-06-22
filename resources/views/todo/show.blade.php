@@ -4,7 +4,7 @@
             <div class="w-full">
                 <div class="flex">
                     <h1 class="text-[24px] font-semibold uppercase">{{$todo->title}}</h1>
-                    @if($todo->isCompleted() === true)
+                    @if($todo->isCompleted())
                         <span class="ml-3"> Completed on {{$todo->remaining_time}}</span>
                     @else
                         <span class="ml-3"> Due in {{$todo->remaining_time}}</span>

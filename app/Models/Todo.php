@@ -36,6 +36,16 @@ class Todo extends Model
 
     public function isCompleted(): bool
     {
-        return $this->getAttribute('is_completed') === 1;
+        return $this->getAttribute('is_completed') == 1;
+    }
+
+    public function pickerDate(): string
+    {
+        return Carbon::createFromDate($this->getAttribute('due_date'))->format('m/d/Y');
+    }
+
+    public function isMine(): bool
+    {
+        return $this->getAttribute('user_id') == request()->user()->id;
     }
 }

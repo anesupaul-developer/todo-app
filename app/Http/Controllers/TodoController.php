@@ -4,23 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\TodoRequest;
 use App\Models\Todo;
-use Carbon\Carbon;
-use Illuminate\Contracts\View\Factory;
+use App\Policies\TodoPolicy;
 use Illuminate\Contracts\View\View;
-use Illuminate\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use Symfony\Component\HttpFoundation\Response as StatusCode;
 
 class TodoController extends Controller
 {
+    public function __construct(protected TodoPolicy $policy)
+    {
+    }
+
     public function index(Request $request): View
     {
-        $todos = Todo::query()->select(['id', 'title', 'due_date', 'created_at'])->paginate(10);
+        $todos = Todo::query()->select(['id', 'title', 'due_date', 'is_completed', 'created_at'])
+            ->where('user_id', $request->user()->getAttribute('id'))
+            ->paginate(10);
 
-        return view('todo.index', [
-            'todos' => $todos,
-        ]);
+        return view('todo.index', ['todos' => $todos]);
     }
 
     public function create(): View
@@ -30,44 +33,48 @@ class TodoController extends Controller
 
     public function store(TodoRequest $request): RedirectResponse
     {
-        $data = $request->validated();
-
-        request()->user()->todos()->create([
-            ...$data,
-            'due_date' => Carbon::createFromDate($data['due_date'])->toDateTimeString()
-        ]);
+        $request->user()->todos()->create($request->validated());
 
         return Redirect::route('todo.index')->with('status', 'todo-created');
     }
 
 
-    public function show(Todo $todo): View
+    public function show(Request $request, Todo $todo): View
     {
+        abort_if(!$this->policy->view($request->user(), $todo), StatusCode::HTTP_FORBIDDEN);
+
         return view('todo.show', [
-            'todo' => $todo
-        ]);
+                'todo' => $todo
+            ]);
     }
 
-    public function edit(Todo $todo): View
+    public function edit(Todo $todo, Request $request): View
     {
+        abort_if(!$this->policy->update($request->user(), $todo), StatusCode::HTTP_FORBIDDEN);
+
         return view('todo.edit', [
             'todo' => $todo
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(TodoRequest $request, Todo $todo): RedirectResponse
     {
-        //
+        abort_if(!$this->policy->update($request->user(), $todo), StatusCode::HTTP_FORBIDDEN);
+
+        $todo->update($request->validated());
+
+        return Redirect::route('todo.show', $todo->getAttribute('id'))->with('status', 'todo-updated');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Todo $todo, Request $request): RedirectResponse
     {
-        //
+        abort_if(!$this->policy->delete($request->user(), $todo), StatusCode::HTTP_FORBIDDEN);
+
+        $todo->delete();
+
+        return Redirect::route('todo.index')->with('status', 'todo-created');
     }
 }
