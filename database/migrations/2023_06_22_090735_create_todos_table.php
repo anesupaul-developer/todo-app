@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('todos', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id');
+            $table->string('title', 100);
+            $table->text('description');
+            $table->timestamp('due_date')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
