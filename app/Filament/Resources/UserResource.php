@@ -44,7 +44,7 @@ class UserResource extends Resource
                             ->dehydrateStateUsing(fn($state) => Hash::make($state))
                             ->dehydrated(fn($state) => filled($state))
                             ->required(fn(string $context): bool => $context === 'create'),
-                        Forms\Components\Toggle::make('is_admin')
+                        Forms\Components\Toggle::make('is_admin')->inline(false)
                             ->label('Is Admin ?')
                             ->onIcon('heroicon-s-lightning-bolt')
                             ->offIcon('heroicon-s-lock-closed')
@@ -90,10 +90,10 @@ class UserResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()->requiresConfirmation(),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\DeleteBulkAction::make()->requiresConfirmation(),
             ]);
     }
 

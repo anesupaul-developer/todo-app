@@ -14,8 +14,10 @@ class Todo extends Model
 
     protected $table = 'todos';
 
+    protected $casts = ['is_completed' => 'boolean'];
+
     protected $fillable = [
-        'user_id', 'description','due_date', 'title'
+        'user_id', 'description','due_date', 'title', 'is_completed'
     ];
 
     public function owner(): BelongsTo

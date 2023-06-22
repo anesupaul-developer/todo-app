@@ -11,9 +11,13 @@ use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use stdClass;
 
 class TodoResource extends Resource
 {
@@ -27,9 +31,18 @@ class TodoResource extends Resource
             Forms\Components\Card::make()->schema([
                 Forms\Components\TextInput::make('title')
                     ->required()
-                    ->maxLength(255),
-                RichEditor::make('description')->required(),
-                Forms\Components\DateTimePicker::make('due_date')->nullable(),
+                    ->maxLength(100),
+                Forms\Components\Textarea::make('description')
+                    ->rows(5)
+                    ->columns(3)
+                    ->required(),
+                Forms\Components\DateTimePicker::make('due_date')->required(),
+                Forms\Components\Toggle::make('is_completed')->inline(false)
+                    ->label('Completed ?')
+                    ->onIcon('heroicon-s-lightning-bolt')
+                    ->offIcon('heroicon-s-lock-closed')
+                    ->onColor('success')
+                    ->offColor('danger'),
                 Forms\Components\Select::make('user_id')
                     ->relationship('owner', 'name')
                     ->required()
@@ -42,17 +55,54 @@ class TodoResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('id')->getStateUsing(
+                    static function (stdClass $rowLoop, HasTable $livewire): string {
+                        return (string)(
+                            $rowLoop->iteration +
+                            ($livewire->tableRecordsPerPage * (
+                                    $livewire->page - 1
+                                ))
+                        );
+                    }
+                )->sortable(),
+                IconColumn::make('is_completed')
+                    ->label('Completed')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-badge-check')
+                    ->falseIcon('heroicon-o-x-circle'),
+                TextColumn::make('owner.name')->searchable()->label('User'),
+                TextColumn::make('title')
+                    ->limit(30)
+                    ->searchable()
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+                        if (strlen($state) <= $column->getLimit()) {
+                            return null;
+                        }
+                        return $state;
+                    }),
+                TextColumn::make('description')
+                    ->limit(30)
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+                        if (strlen($state) <= $column->getLimit()) {
+                            return null;
+                        }
+                        return $state;
+                    })
             ])
             ->filters([
-                //
+                Filter::make('is_completed')
+                    ->query(fn(Builder $query): Builder => $query->where('is_completed', true)),
+                Filter::make('incomplete')
+                    ->query(fn(Builder $query): Builder => $query->where('is_completed', false))
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()->requiresConfirmation(),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\DeleteBulkAction::make()->requiresConfirmation(),
             ]);
     }
 
