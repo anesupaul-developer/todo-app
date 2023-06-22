@@ -13,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash;
@@ -39,9 +40,9 @@ class UserResource extends Resource
                     ->password()
                     ->required()
                     ->maxLength(255)
-                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                    ->dehydrated(fn ($state) => filled($state))
-                    ->required(fn (string $context): bool => $context === 'create'),
+                    ->dehydrateStateUsing(fn($state) => Hash::make($state))
+                    ->dehydrated(fn($state) => filled($state))
+                    ->required(fn(string $context): bool => $context === 'create'),
                 Forms\Components\Toggle::make('is_admin')
                     ->label('Is Admin ?')
                     ->onIcon('heroicon-s-lightning-bolt')
@@ -51,13 +52,16 @@ class UserResource extends Resource
             ]);
     }
 
+    /**
+     * @throws \Exception
+     */
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 TextColumn::make('id')->getStateUsing(
                     static function (stdClass $rowLoop, HasTable $livewire): string {
-                        return (string) (
+                        return (string)(
                             $rowLoop->iteration +
                             ($livewire->tableRecordsPerPage * (
                                     $livewire->page - 1
@@ -65,8 +69,8 @@ class UserResource extends Resource
                         );
                     }
                 )->sortable(),
-                Tables\Columns\TextColumn::make('name'),
-                Tables\Columns\TextColumn::make('email'),
+                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('email')->searchable(),
                 IconColumn::make('is_admin')
                     ->label('Is Admin')
                     ->boolean()
@@ -76,7 +80,10 @@ class UserResource extends Resource
                     ->dateTime('Y-m-d'),
             ])
             ->filters([
-                //
+                Filter::make('is_admin')
+                    ->query(fn(Builder $query): Builder => $query->where('is_admin', true)),
+                Filter::make('is_not_admin')
+                    ->query(fn(Builder $query): Builder => $query->where('is_admin', false))
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
