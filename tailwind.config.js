@@ -14,7 +14,7 @@ export default {
         './vendor/wire-elements/modal/resources/views/*.blade.php',
         './storage/framework/views/*.php',
     ],
-    darkMode: true,
+    darkMode: "class",
 
     theme: {
         extend: {
