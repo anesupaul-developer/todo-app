@@ -35,7 +35,7 @@ class TodoController extends Controller
     {
         $request->user()->todos()->create($request->validated());
 
-        return Redirect::route('todo.index')->with('status', 'todo-created');
+        return Redirect::route('todo.index')->with('status', 'Todo created successfully!');
     }
 
 
@@ -63,7 +63,8 @@ class TodoController extends Controller
 
         $todo->update($request->validated());
 
-        return Redirect::route('todo.show', $todo->getAttribute('id'))->with('status', 'todo-updated');
+        return Redirect::route('todo.show', $todo->getAttribute('id'))
+            ->with('status', 'Todo updated successfully!');
     }
 
     /**
@@ -75,6 +76,6 @@ class TodoController extends Controller
 
         $todo->delete();
 
-        return Redirect::route('todo.index')->with('status', 'todo-created');
+        return Redirect::route('todo.index')->with('status', 'Todo deleted successfully!');
     }
 }

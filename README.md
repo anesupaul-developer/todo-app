@@ -8,9 +8,13 @@ User screen was created using Laravel Breeze
 
 ## TO RUN THE APPLICATION
 - Unzip the file and place it in a folder of your choice say src so that you src/app/Http/Controllers/....
+- Copy .env.example file and created .env file
 
 On your terminal navigate to the root folder of the project and run 
-    ** composer install and run php artisan serve --port=8000 
+- composer install 
+
+Create todo_app database or change inside your .env file and run 
+- php artisan migrate && php artisan serve
 
 and open 
     - http://localhost:8000 
@@ -19,18 +23,17 @@ You can create an account by clicking ## Dont have an account? ##
 Once logged in you can create a new todo by clicking Create Todo button.
 
 You can also view, edit or delete the todo.
-### Please note that once the todo has been marked as complete it can no-longer be edited
 
 in your browser and open another browser or chrome incognito mode and open 
     - http://localhost:8000/admin
 
 Open another terminal and run this command
-    **npm install && npm run dev
+- npm install && npm run dev
 
 Open another terminal and run 
-    **php artisan create:user
+- php artisan create:user
 so you can create your user either admin or not. 
-### Please note that password field is secret and you wont see any text on the console
+Please note that password field is secret and you wont see any text on the console
 
 after, login on the admin panel with the credentials you just created.
 
