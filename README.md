@@ -32,7 +32,8 @@ Open another terminal and run this command
 
 Open another terminal and run 
 - php artisan create:user
-so you can create your user either admin or not. 
+
+You can create your user either admin or not. 
 Please note that password field is secret and you wont see any text on the console
 
 after, login on the admin panel with the credentials you just created.
