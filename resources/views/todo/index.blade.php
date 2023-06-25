@@ -64,10 +64,10 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4">
-                                    {{\Carbon\Carbon::createFromDate($todo->due_date)->format('Y-m-d')}}
+                                    {{\App\Helpers\DateTimeUtil::format($todo->due_date)}}
                                 </td>
                                 <td class="px-6 py-4">
-                                    {{\Carbon\Carbon::createFromDate($todo->created_at)->format('Y-m-d')}}
+                                    {{\App\Helpers\DateTimeUtil::format($todo->created_at)}}
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="inline-flex rounded-md shadow-sm" role="group">
